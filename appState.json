@@ -8,7 +8,8 @@
         "type": "DIRECTORY",
         "isDirectory": true,
         "children": [
-          "a0fa1f88-7c21-4a75-acab-c188be1a6dc5"
+          "a0fa1f88-7c21-4a75-acab-c188be1a6dc5",
+          "91a540fd-1426-488f-9e88-7b15fbcd0822"
         ],
         "isRemovable": false,
         "filePath": "hiru0609_awstogcp"
@@ -22,7 +23,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "hiru0609_awstogcp/lambda.js",
-        "code": "let AWS = require('aws-sdk');\nconst s3 = new AWS.S3();\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "code": "let google = require('googleapis').google;\nlet _auth = require('./Authorizer');\nconst storage = google.storage('v1');\nlet AWS = require('aws-sdk');\nconst s3 = new AWS.S3();\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    s3.getObject({\n        'Bucket': \"hirudinee0508\",\n        'Key': \"hiru.txt\"\n    }).promise()\n        .then(data => {\n            console.log(data);\n            var body = data.body;\n            storage.objects.insert({\n                \"bucket\": \"hirutest01\",\n                \"name\": \"hiru.txt\",\n                \"media\": {\n                    \"body\": body\n                }\n            })\n                .then(response => {\n                    console.log(response.data);           // successful response\n                    //todo\n                })\n                .catch(err => {\n                    console.log(err, err.stack); // an error occurred\n                });\n            // successful response\n            //todo\n        })\n        .catch(err => {\n            console.log(err, err.stack); // an error occurred\n        });\n\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
         "config": {
           "runtime": "nodejs8.10",
           "handler": "handler",
@@ -36,6 +37,17 @@
             "config": {}
           }
         ]
+      },
+      "91a540fd-1426-488f-9e88-7b15fbcd0822": {
+        "id": "91a540fd-1426-488f-9e88-7b15fbcd0822",
+        "parent": "5834963c-18fd-466b-9bde-c502e6e1ef15",
+        "name": "Authorizer.js",
+        "type": "JS_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "hiru0609_awstogcp/Authorizer.js",
+        "code": "const google = require(\"googleapis\").google;\n\nconst key = JSON.parse(process.env.GCP_SERVICE_ACCOUNT_KEY);\nconst jwtClient = new google.auth.JWT({\n    email: key.client_email,\n    key: key.private_key,\n    scopes: [\"https://www.googleapis.com/auth/cloud-platform\"]\n});\n\ngoogle.options({auth: jwtClient, project: process.env.GCP_PROJECT});"
       }
     },
     "deletedFiles": [],
@@ -74,6 +86,16 @@
           "stageName": "Test",
           "mode": 0
         }
+      },
+      "storagehirutest01": {
+        "name": "storagehirutest01",
+        "type": "storage",
+        "config": {
+          "mode": 1,
+          "bucket": {
+            "name": "hirutest01"
+          }
+        }
       }
     },
     "customTemplate": {
@@ -88,6 +110,22 @@
         "shouldPersist": false,
         "displayOnly": false,
         "editable": false
+      },
+      {
+        "lambdaId": "all",
+        "varKey": "GCP_SERVICE_ACCOUNT_KEY",
+        "varValue": null,
+        "shouldPersist": false,
+        "displayOnly": false,
+        "editable": false
+      },
+      {
+        "lambdaId": "all",
+        "varKey": "GCP_PROJECT",
+        "varValue": null,
+        "shouldPersist": false,
+        "displayOnly": false,
+        "editable": false
       }
     ],
     "packageJSON": {
@@ -97,6 +135,13 @@
           "language": "javascript",
           "version": "2.176.0",
           "dev": true,
+          "notRemovable": false
+        },
+        "googleapis": {
+          "name": "googleapis",
+          "language": "javascript",
+          "version": "29.0.0",
+          "dev": false,
           "notRemovable": false
         }
       }
@@ -109,7 +154,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1567762590781
+    "lastSave": 1567763814042
   },
   "VCS_STATE": {
     "provider": "GitHub",
