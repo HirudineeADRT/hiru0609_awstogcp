@@ -2,7 +2,7 @@
   "name": "hiru0609_awstogcp",
   "version": "1.0.0",
   "dependencies": {
-    "googleapis": "29.0.0"
+    "googleapis": "59.0.0"
   },
   "devDependencies": {
     "aws-sdk": "2.176.0"
